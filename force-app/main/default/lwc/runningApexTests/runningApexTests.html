@@ -1,0 +1,96 @@
+<template>
+    <template if:true={testOptions}>
+        
+        <lightning-card title="Setup Test Run">
+            <table>
+                <tr>
+    
+                    <td style="width: 50%;">
+                        <lightning-dual-listbox
+                            label="Select Test"
+                            options={testOptions}
+                            onchange={runPropHandler}
+                            value={runProp.classesToRun}
+                            data-prop="classesToRun"
+                            size=5
+                            class="slds-form__item slds-no-space"
+                            style="max-width: 600px;">
+                        </lightning-dual-listbox>
+                    
+                        <lightning-input label="Title" type="text" value={runProp.jobName} onchange={runPropHandler} data-prop="jobName" class="slds-form__item slds-no-space" style="max-width: 300px;"></lightning-input>
+
+                        <lightning-input label="Time to Run" type="datetime" value={runProp.timeToRun} onchange={runPropHandler} data-prop="timeToRun" class="slds-form__item slds-no-space" style="max-width: 300px;"></lightning-input>
+                        
+                        <lightning-input label="Is Repeated" type="checkbox" checked={runProp.isRepeated} onchange={runPropHandler} data-prop="isRepeated" class="slds-form__item slds-no-space" style="max-width: 300px;"></lightning-input>
+
+                        <lightning-combobox label="Iterval Type" value={runProp.intervalType} onchange={runPropHandler} options={intervalTypeOptions} data-prop="intervalType" class="slds-form__item slds-no-space" style="max-width: 300px;"></lightning-combobox>
+
+                        <lightning-input label="Interval" type="number" checked={runProp.intervalUnits} onchange={runPropHandler} data-prop="intervalUnits" class="slds-form__item slds-no-space" style="max-width: 300px;"></lightning-input>
+
+                        <lightning-button label="Run Test" onclick={runTestHandler} class="slds-form__item slds-no-space"></lightning-button>
+                    </td>
+
+                    <td style="width: 50%; vertical-align: top;">
+                        <template if:true={showRunning}>
+                            <div style="font-size: 18px;text-align: center;">Schedule Test Job</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Interval</th>
+                                        <th>Next Run</th>
+                                        <th>+</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={runningJobs} for:item="rJob">
+                                        <tr key={rJob.Id}>
+                                            <td>{rJob.mba_services__Parent_Job__r.mba_services__Subject__c}</td>
+                                            <td>{rJob.mba_services__Parent_Job__r.mba_services__Repeated_Type__c}</td>
+                                            <td>{rJob.mba_services__Parent_Job__r.mba_services__Repeated_Interval__c}</td>
+                                            <td>
+                                                <lightning-formatted-date-time value={rJob.mba_services__Parent_Job__r.mba_services__Time_to_Run__c} year="numeric" month="2-digit" day="numeric" hour="numeric" minute="numeric" hour12="false">
+                                                </lightning-formatted-date-time>
+                                            </td>
+                                            <td><lightning-button label="Abort" onclick={aborTestRun} data-jid={rJob.mba_services__Parent_Job__c}></lightning-button></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
+                        <br/>
+
+                        <template if:true={showCompleted}>
+                            <div style="font-size: 18px;text-align: center;">Latest Run Result</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                        <th>Errors</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={completedJobs} for:item="cJob">
+                                        <tr key={cJob.Id}>
+                                            <td>{cJob.mba_services__Subject__c}</td>
+                                            <td>{cJob.status}</td>
+                                            <td>
+                                                <template for:each={cJob.errors} for:item="eItem">
+                                                    <div key={eItem.Id}>
+                                                        {eItem.ApexClass.Name}.{eItem.MethodName}: {eItem.Message}
+                                                    </div>
+                                                </template>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
+                    </td>
+                </tr>
+            </table>
+        </lightning-card>
+    </template>
+</template>
